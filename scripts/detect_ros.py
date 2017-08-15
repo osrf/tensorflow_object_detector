@@ -30,23 +30,24 @@ from copy import deepcopy
 import time
 
 # This is needed utils is stored in object_detection folder.
-sys.path.append('object_detection')
+# sys.path.append('object_detection')
 
 # ## Object detection imports
 # Here are the imports from the object detection module.
-from utils import label_map_util
+from object_detection.utils import label_map_util
 
-from utils import visualization_utils as vis_util
+from object_detection.utils import visualization_utils as vis_util
 
+# print (os.path.dirname(sys.path[0]))
 # What model to use
 MODEL_NAME =  'ssd_mobilenet_v1_coco_11_06_2017'
-MODEL_PATH = '../data/models/' + MODEL_NAME
-
+MODEL_PATH = os.path.join(os.path.dirname(sys.path[0]),'data','models' , MODEL_NAME)
+# print(MODEL_PATH)
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 PATH_TO_CKPT = MODEL_PATH + '/frozen_inference_graph.pb'
-
+LABEL_NAME = 'mscoco_label_map.pbtxt'
 # List of the strings that is used to add correct label for each box.
-PATH_TO_LABELS = os.path.join('../data/labels', 'mscoco_label_map.pbtxt')
+PATH_TO_LABELS = os.path.join(os.path.dirname(sys.path[0]),'data','labels', LABEL_NAME)
 
 NUM_CLASSES = 90
 
