@@ -74,7 +74,7 @@ with detection_graph.as_default():
       def __init__(self):
         self.image_pub = rospy.Publisher("/detector/image_raw",Image, queue_size=1)
         self.object_pub = rospy.Publisher("/detector/Objects", Detection2DArray, queue_size=1)
-        self.detect_pub = rospy.Publisher("/detector/Object", Detection2D, queue_size=1)
+        # self.detect_pub = rospy.Publisher("/detector/Object", Detection2D, queue_size=1)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/camera/rgb/image_raw" , Image , self.callback, queue_size=1, buff_size=2**24)
         
@@ -87,7 +87,7 @@ with detection_graph.as_default():
         except CvBridgeError as e:
           print(e)
         image=cv2.cvtColor(cv_image,cv2.COLOR_BGR2RGB)
-        # print(image.size)
+        
         # the array based representation of the image will be used later in order to prepare the
         # result image with boxes and labels on it.
         image_np = np.asarray(image)
@@ -134,25 +134,22 @@ with detection_graph.as_default():
         self.image_pub.publish(image_out)
       
       def object_predict(self,object_data, header, image_np,image):
-        
+        image_height,image_width,channels = image.shape
         obj=Detection2D() 
         obj_hypothesis= ObjectHypothesisWithPose()  
         
         object_id=object_data[0]
         object_score=object_data[1]
         dimensions=object_data[2]
-        # image_width,image_height=image.size
-        # print (image_width)
-        # print (image_height)
-        # print(image.size)
+       
         obj.header=header
         obj_hypothesis.id = object_id
         obj_hypothesis.score = object_score
         obj.results.append(obj_hypothesis)
-        obj.bbox.size_y = int((dimensions[2]-dimensions[0])*480)
-        obj.bbox.size_x = int((dimensions[3]-dimensions[1] )*640)
-        obj.bbox.center.y = int((dimensions[1] + dimensions [3])*480/2)
-        obj.bbox.center.x = int((dimensions[0] + dimensions[2])*640/2)
+        obj.bbox.size_y = int((dimensions[2]-dimensions[0])*image_height)
+        obj.bbox.size_x = int((dimensions[3]-dimensions[1] )*image_width)
+        obj.bbox.center.y = int((dimensions[1] + dimensions [3])*image_height/2)
+        obj.bbox.center.x = int((dimensions[0] + dimensions[2])*image_width/2)
 
         return obj 
 

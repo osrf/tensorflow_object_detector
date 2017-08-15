@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Image1
       Splitter Ratio: 0.494444
     Tree Height: 290
   - Class: rviz/Selection
@@ -31,18 +32,6 @@ Visualization Manager:
   Class: ""
   Displays:
     - Class: rviz/Image
-      Enabled: false
-      Image Topic: /camera/rgb/image_raw
-      Max Value: 1
-      Median window: 5
-      Min Value: 0
-      Name: Image
-      Normalize Range: true
-      Queue Size: 2
-      Transport Hint: raw
-      Unreliable: false
-      Value: false
-    - Class: rviz/Image
       Enabled: true
       Image Topic: /detector/image_raw
       Max Value: 1
@@ -54,6 +43,18 @@ Visualization Manager:
       Transport Hint: raw
       Unreliable: false
       Value: true
+    - Class: rviz/Image
+      Enabled: false
+      Image Topic: /detector/image_raw
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
