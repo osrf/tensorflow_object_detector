@@ -1,4 +1,4 @@
-#!usr/bin/python
+#!/usr/bin/env python
 ## Author: Rohit
 ## Date: July, 25, 2017 
 #Purpose: Ros node to detect objects using tensorflow 

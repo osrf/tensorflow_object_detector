@@ -3,8 +3,8 @@
 	<node pkg= "tf_object_detect" name="detect_ros" type="detect_ros.py"  output="screen" />
 	<!-- rviz -->
     <arg name ="rviz" default="true" />
-    <!-- <arg name ="rviz_file" default="$(find dn_object_detect)/config/yolo_disp.rviz"/> -->
-	<node pkg ="rviz" type="rviz" name="rviz" output="screen" if="$(arg rviz)"/>
+    <arg name ="rviz_file" default="$(find tf_object_detect)/config/display.rviz"/>
+	<node pkg ="rviz" type="rviz" name="rviz" output="screen" args= "-d $(arg rviz_file)" if="$(arg rviz)"/>
     <include file="$(find openni2_launch)/launch/openni2.launch"/>
 
 </launch>
