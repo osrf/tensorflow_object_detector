@@ -40,15 +40,19 @@ from object_detection.utils import visualization_utils as vis_util
 
 # print (os.path.dirname(sys.path[0]))
 # What model to use
+######### CHANGE THE MODEL NAME HERE ############
 MODEL_NAME =  'ssd_mobilenet_v1_coco_11_06_2017'
+# By default models are stored in data/models/ 
 MODEL_PATH = os.path.join(os.path.dirname(sys.path[0]),'data','models' , MODEL_NAME)
-# print(MODEL_PATH)
+
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 PATH_TO_CKPT = MODEL_PATH + '/frozen_inference_graph.pb'
+######### CHANGE THE LABEL NAME HERE ###########
 LABEL_NAME = 'mscoco_label_map.pbtxt'
 # List of the strings that is used to add correct label for each box.
 PATH_TO_LABELS = os.path.join(os.path.dirname(sys.path[0]),'data','labels', LABEL_NAME)
 
+###CHANGE NUMBER OF CLASSES HERE ####
 NUM_CLASSES = 90
 
 detection_graph = tf.Graph()
