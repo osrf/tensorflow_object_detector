@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tf_object_detect)
+include(ExternalData)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -15,9 +16,30 @@ find_package(catkin REQUIRED COMPONENTS
   vision_msgs
 )
 
+##set the URL to download
+set(URL "http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_11_06_2017.tar.gz")
+set(DOWNLOAD_PATH ${CMAKE_CURRENT_BINARY_DIR}/ssd_mobilenet_v1_coco_11_06_2017.tar.gz})
+set(EXTRACTED_PATH ${CMAKE_CURRENT_SOURCE_DIR}/data/models)
+
+if (NOT EXISTS "${DOWNLOAD_PATH}")
+  message(STATUS "Downloading...")
+  file(
+    DOWNLOAD "${URL}" "${DOWNLOAD_PATH}"
+    SHOW_PROGRESS
+  )
+endif()
+
+if (NOT EXISTS "${EXTRACTED_PATH}/extracted_file")
+  message(STATUS "Extracting...")
+  execute_process(
+    COMMAND cmake -E tar xzf ${DOWNLOAD_PATH}
+    WORKING_DIRECTORY ${EXTRACTED_PATH}
+  #  COMMAND mv ${EXTRACTED_PATH}/extracted_file ${EXTRACTED_PATH}/data/
+  )
+endif()
+	
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed

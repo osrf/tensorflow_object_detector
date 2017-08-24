@@ -38,6 +38,25 @@ from object_detection.utils import label_map_util
 
 from object_detection.utils import visualization_utils as vis_util
 
+import keras.backend.tensorflow_backend as KTF
+
+GPU_FRACTION = 0.1
+# CAMERA_TOPIC = "camera/rgb/image_raw"
+CAMERA_TOPIC = "/camera/rgb/image_raw"
+
+def get_session(gpu_fraction=GPU_FRACTION):
+
+    num_threads = os.environ.get('OMP_NUM_THREADS')
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_fraction)
+
+    if num_threads:
+        return tf.Session(config=tf.ConfigProto(
+            gpu_options=gpu_options, intra_op_parallelism_threads=num_threads))
+    else:
+        return tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
+
+KTF.set_session(get_session())
+
 # print (os.path.dirname(sys.path[0]))
 # What model to use
 ######### CHANGE THE MODEL NAME HERE ############
@@ -78,9 +97,8 @@ with detection_graph.as_default():
       def __init__(self):
         self.image_pub = rospy.Publisher("/detector/image_raw",Image, queue_size=1)
         self.object_pub = rospy.Publisher("/detector/Objects", Detection2DArray, queue_size=1)
-        # self.detect_pub = rospy.Publisher("/detector/Object", Detection2D, queue_size=1)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/camera/rgb/image_raw" , Image , self.callback, queue_size=1, buff_size=2**24)
+        self.image_sub = rospy.Subscriber(CAMERA_TOPIC , Image , self.callback, queue_size=1, buff_size=2**24)
         
 
       def callback(self,data):
@@ -164,6 +182,7 @@ def main(args):
     rospy.spin()
   except KeyboardInterrupt:
     print("ShutDown")
+  KTF.clear_session()
   cv2.destroyAllWindows()
 
 if __name__=='__main__':
