@@ -1,9 +1,7 @@
-# tf_object_detect
-
-Tensorflow Object Detector with ROS
+#Tensorflow Object Detector with ROS
 
 Requirements:
--Tensorflow
+-Tensorflow,
 -ROS
 
 Steps:
