@@ -22,7 +22,7 @@ set(DOWNLOAD_PATH ${CMAKE_CURRENT_BINARY_DIR}/ssd_mobilenet_v1_coco_11_06_2017.t
 set(EXTRACTED_PATH ${CMAKE_CURRENT_SOURCE_DIR}/data/models)
 
 if (NOT EXISTS "${DOWNLOAD_PATH}")
-  message(STATUS "Downloading...")
+  message(STATUS "Downloading SSD model ....")
   file(
     DOWNLOAD "${URL}" "${DOWNLOAD_PATH}"
     SHOW_PROGRESS
