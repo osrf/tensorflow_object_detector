@@ -29,12 +29,11 @@ if (NOT EXISTS "${DOWNLOAD_PATH}")
   )
 endif()
 
-if (NOT EXISTS "${EXTRACTED_PATH}/extracted_file")
+if (NOT EXISTS "${EXTRACTED_PATH}/ssd_mobilenet_v1_coco_11_06_2017")
   message(STATUS "Extracting...")
   execute_process(
     COMMAND cmake -E tar xzf ${DOWNLOAD_PATH}
     WORKING_DIRECTORY ${EXTRACTED_PATH}
-  #  COMMAND mv ${EXTRACTED_PATH}/extracted_file ${EXTRACTED_PATH}/data/
   )
 endif()
 	
