@@ -1,15 +1,15 @@
 # Tensorflow Object Detector with ROS
 
 Requirements:
--Tensorflow,
--ROS
+Tensorflow and ROS
 
 Steps:
 
 To run Default SSD (Single Shot Detection) algorithm:
-1) In your catkin workspace, RUN `catkin_make install`
-2) Source the tensorflow environment
-3) Run `roslaunch tf_object_detect object_detect.launch`
+1) This package uses the proposed standard Vision messages, so clone/download the vision messages package and place it in the catkin workspace. Vision messages package: https://github.com/Kukanani/vision_msgs.git
+2) Clone/download this repository and place it your catkin workspace, RUN `catkin_make install`
+3) Source the tensorflow environment
+4) Run `roslaunch tf_object_detect object_detect.launch`
 
 If you want to try any other model:
 1) Download any Object Detection Models from the Tensorflow Object detection API and place it in `data/models/`. 
