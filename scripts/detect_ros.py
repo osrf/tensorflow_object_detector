@@ -40,9 +40,9 @@ from object_detection.utils import visualization_utils as vis_util
 
 import keras.backend.tensorflow_backend as KTF
 
-GPU_FRACTION = 0.1
-# CAMERA_TOPIC = "camera/rgb/image_raw"
-CAMERA_TOPIC = "/camera/rgb/image_raw"
+GPU_FRACTION = 0.2
+
+# CAMERA_TOPIC = "/camera/rgb/image_raw"
 
 def get_session(gpu_fraction=GPU_FRACTION):
 
@@ -57,7 +57,6 @@ def get_session(gpu_fraction=GPU_FRACTION):
 
 KTF.set_session(get_session())
 
-# print (os.path.dirname(sys.path[0]))
 # What model to use
 ######### CHANGE THE MODEL NAME HERE ############
 MODEL_NAME =  'ssd_mobilenet_v1_coco_11_06_2017'
@@ -176,8 +175,13 @@ with detection_graph.as_default():
         return obj 
 
 def main(args):
-  obj=detector()
+  
   rospy.init_node('detector_node')
+  global CAMERA_TOPIC
+  CAMERA_TOPIC = rospy.get_param('~camera_topic')
+
+  obj=detector()
+
   try:
     rospy.spin()
   except KeyboardInterrupt:

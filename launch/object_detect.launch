@@ -1,6 +1,8 @@
 <launch>
 
-	<node pkg= "tf_object_detect" name="detect_ros" type="detect_ros.py"  output="screen" />
+	<node pkg= "tf_object_detect" name="detect_ros" type="detect_ros.py"  output="screen"> 
+		<param name ='camera_topic' type="str" value="/camera/rgb/image_raw" />
+	</node>
 	<!-- rviz -->
     <arg name ="rviz" default="true" />
     <arg name ="rviz_file" default="$(find tf_object_detect)/config/display.rviz"/>
