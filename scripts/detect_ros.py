@@ -8,7 +8,13 @@ import os
 import six.moves.urllib as urllib
 import sys
 import tarfile
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    print("unable to import TensorFlow. Is it installed?")
+    print("  sudo apt install python-pip")
+    print("  sudo pip install tensorflow")
+    sys.exit(1)
 import zipfile
 import cv2
 import object_detection
@@ -38,11 +44,14 @@ from object_detection.utils import label_map_util
 
 from object_detection.utils import visualization_utils as vis_util
 
-import keras.backend.tensorflow_backend as KTF
+try:
+    import keras.backend.tensorflow_backend as KTF
+except ImportError:
+    print("unable to import Keras. Is it installed?")
+    print("  sudo pip install keras")
+    sys.exit(1)
 
 GPU_FRACTION = 0.2
-
-# CAMERA_TOPIC = "/camera/rgb/image_raw"
 
 def get_session(gpu_fraction=GPU_FRACTION):
 
@@ -97,11 +106,9 @@ with detection_graph.as_default():
         self.image_pub = rospy.Publisher("/detector/image_raw",Image, queue_size=1)
         self.object_pub = rospy.Publisher("/detector/Objects", Detection2DArray, queue_size=1)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber(CAMERA_TOPIC , Image , self.callback, queue_size=1, buff_size=2**24)
+        self.image_sub = rospy.Subscriber('image', Image, self.image_cb, queue_size=1, buff_size=2**24)
         
-
-      def callback(self,data):
-       
+      def image_cb(self, data):
         objArray = Detection2DArray()
         try:
           cv_image = self.bridge.imgmsg_to_cv2(data,"bgr8")
@@ -177,9 +184,6 @@ with detection_graph.as_default():
 def main(args):
   
   rospy.init_node('detector_node')
-  global CAMERA_TOPIC
-  CAMERA_TOPIC = rospy.get_param('~camera_topic')
-
   obj=detector()
 
   try:
