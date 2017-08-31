@@ -44,27 +44,8 @@ from object_detection.utils import label_map_util
 
 from object_detection.utils import visualization_utils as vis_util
 
-try:
-    import keras.backend.tensorflow_backend as KTF
-except ImportError:
-    print("unable to import Keras. Is it installed?")
-    print("  sudo pip install keras")
-    sys.exit(1)
-
-GPU_FRACTION = 0.2
-
-def get_session(gpu_fraction=GPU_FRACTION):
-
-    num_threads = os.environ.get('OMP_NUM_THREADS')
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_fraction)
-
-    if num_threads:
-        return tf.Session(config=tf.ConfigProto(
-            gpu_options=gpu_options, intra_op_parallelism_threads=num_threads))
-    else:
-        return tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
-
-KTF.set_session(get_session())
+# SET FRACTION OF GPU YOU WANT TO USE HERE
+GPU_FRACTION = 0.1
 
 # What model to use
 ######### CHANGE THE MODEL NAME HERE ############
@@ -97,9 +78,12 @@ label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = GPU_FRACTION
+
 # # Detection
 with detection_graph.as_default():
-  with tf.Session(graph=detection_graph) as sess:
+  with tf.Session(graph=detection_graph,config=config) as sess:
     class detector: 
 
       def __init__(self):
@@ -190,7 +174,6 @@ def main(args):
     rospy.spin()
   except KeyboardInterrupt:
     print("ShutDown")
-  KTF.clear_session()
   cv2.destroyAllWindows()
 
 if __name__=='__main__':
