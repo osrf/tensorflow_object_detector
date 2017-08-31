@@ -7,9 +7,9 @@ Steps:
 
 To run Default SSD (Single Shot Detection) algorithm:
 1) This package uses the proposed standard Vision messages, so clone/download the vision messages package and place it in the catkin workspace. Vision messages package: https://github.com/Kukanani/vision_msgs.git
-2) Clone/download this repository and place it your catkin workspace, RUN `catkin_make install`
+2) Clone/download this repository and place it your catkin workspace, RUN `catkin_make`
 3) Source the tensorflow environment
-4) Run `roslaunch tf_object_detect object_detect.launch`. (NOTE: This launch file also launches the openni2.launch file for the camera. If you are using any other camera, please change the camera topic in the detector_ros.py before launching the file)
+4) Run `roslaunch tf_object_detect object_detect.launch`. (NOTE: This launch file also launches the openni2.launch file for the camera. If you are using any other camera, please change the camera topic in the launch file before launching the file)
 
 If you want to try any other model:
 1) Download any Object Detection Models from the Tensorflow Object detection API and place it in `data/models/`. 
