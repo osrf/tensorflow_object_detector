@@ -87,15 +87,15 @@ with detection_graph.as_default():
     class detector: 
 
       def __init__(self):
-        self.image_pub = rospy.Publisher("/detector/image_raw",Image, queue_size=1)
-        self.object_pub = rospy.Publisher("/detector/Objects", Detection2DArray, queue_size=1)
+        self.image_pub = rospy.Publisher("debug_image",Image, queue_size=1)
+        self.object_pub = rospy.Publisher("objects", Detection2DArray, queue_size=1)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber('image', Image, self.image_cb, queue_size=1, buff_size=2**24)
+        self.image_sub = rospy.Subscriber("image", Image, self.image_cb, queue_size=1, buff_size=2**24)
         
       def image_cb(self, data):
         objArray = Detection2DArray()
         try:
-          cv_image = self.bridge.imgmsg_to_cv2(data,"bgr8")
+          cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
           print(e)
         image=cv2.cvtColor(cv_image,cv2.COLOR_BGR2RGB)
