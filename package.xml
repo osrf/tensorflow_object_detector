@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>tf_object_detect</name>
+  <name>tensorflow_object_detector</name>
   <version>0.0.0</version>
-  <description>The tf_object_detect package</description>
+  <description>The tensorflow_object_detector package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
