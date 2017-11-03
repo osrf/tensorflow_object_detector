@@ -1,15 +1,17 @@
-
 import os
 import sys
 import tensorflow as tf
 import pandas as pd
 from PIL import Image
+import io
+import PIL.Image
+import numpy as np
 
 from object_detection.utils import dataset_util
 
 csv_path = os.path.join(os.path.dirname(sys.path[0]),"pedestrian_data", "data.csv")
 img_path = os.path.join(os.path.dirname(sys.path[0]),"pedestrian_data", "images")
-
+out_path = os.path.join(os.path.dirname(sys.path[0]),"pedestrian_data", "record_files")
 def get_csv_data(file):
     data = pd.read_csv(file)
     image_names, center_x, center_y, size_x, size_y = [], [], [], [], []
@@ -40,22 +42,28 @@ def create_tf_example(encoded_image_data, filename, height, width, xmins, xmaxs,
     return tf_example
 
 if __name__ == "__main__":
+    writer = tf.python_io.TFRecordWriter(out_path)
     class_name  = "pedestrian"
     image_names, center_x, center_y, size_x, size_y = get_csv_data(csv_path)
     for index in range(len(image_names)):
         filename = image_names[index]
-        im=Image.open(os.path.join(img_path, image_names[index]))
+        filepath = os.path.join(img_path, image_names[index])
+        with tf.gfile.GFile(filepath, 'rb') as fid:
+            encoded_jpeg = fid.read()
+        encoded_jpeg_io = io.BytesIO(encoded_jpeg)
+        im = PIL.Image.open(encoded_jpeg_io)
+        # im=Image.open(os.path.join(img_path, image_names[index]))
         width = int(im.size[0])
         height = int(im.size[1])
         dw = 1./width
         dh = 1./height
         # Normalizing the coordinates
-        x_mins = (center_x[index]-size_x[index]/2)*dw
-        x_maxs = (center_x[index]+size_x[index]/2)*dw
-        y_mins = (center_y[index]-size_y[index]/2)*dh
-        y_maxs = (center_y[index]+size_y[index]/2)*dh
+        x_mins = [(center_x[index]-size_x[index]/2)*dw]
+        x_maxs = [(center_x[index]+size_x[index]/2)*dw]
+        y_mins = [(center_y[index]-size_y[index]/2)*dh]
+        y_maxs = [(center_y[index]+size_y[index]/2)*dh]
         classes_text = [class_name]
         classes = [1]
-        tf_example = create_tf_example(im, filename, height, width, x_mins, x_maxs, y_mins, y_maxs)
+        tf_example = create_tf_example(encoded_jpeg, filename, height, width, x_mins, x_maxs, y_mins, y_maxs)
         writer.write(tf_example.SerializeToString())
     writer.close()
