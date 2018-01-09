@@ -1,7 +1,9 @@
 # Tensorflow Object Detector with ROS
 
-Requirements:
+## Requirements:
+
 Tensorflow and ROS
+
 This guide targets Ubuntu 16.04 and ROS Kinetic
 
 Steps:
