@@ -24,6 +24,10 @@ To run Default SSD (Single Shot Detection) algorithm:
 
     `source ~/tensorflow/bin/activate`
 
+    `easy_install -U pip`
+
+    `pip install --upgrade tensorflow`
+
 4. `mkdir ~/catkin_ws/ && mkdir ~/catkin_ws/src/`
 
 5. Clone standard Vision messages repository and this repository into `catkin_ws/src`:
@@ -38,9 +42,7 @@ To run Default SSD (Single Shot Detection) algorithm:
 
     `cd ~/catkin_ws && catkin_make`
 
-7. Source the tensorflow environment and catkin workspace's setup.bash:
-
-    `source ~/tensorflow/bin/activate`
+7. Source catkin workspace's setup.bash:
 
     `source ~/catkin_ws/devel/setup.bash`
 
