@@ -14,7 +14,7 @@ To run Default SSD (Single Shot Detection) algorithm:
 
 2. Install camera dependencies
 
-`sudo apt-get install ros-kinetic-usb_cam ros-kinetic-openni2-launch`
+    `sudo apt-get install ros-kinetic-usb_cam ros-kinetic-openni2-launch`
 
 3. Install tensorflow into python virtualenv: https://www.tensorflow.org/install/install_linux
 
