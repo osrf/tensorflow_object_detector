@@ -6,7 +6,7 @@ Tensorflow and ROS
 
 This guide targets Ubuntu 16.04 and ROS Kinetic
 
-Steps:
+## Steps:
 
 To run Default SSD (Single Shot Detection) algorithm:
 
