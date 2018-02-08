@@ -5,6 +5,7 @@
 
   <node pkg="usb_cam" type="usb_cam_node" name="usb_cam_node" output="screen">
     <param name="pixel_format" value="yuyv"/>
+    <param name="video_device" value="/dev/video0"/>
   </node>
 
   <node pkg="image_view" type="image_view" name="image_view">
