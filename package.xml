@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>tensorflow_object_detector</name>
   <version>0.0.0</version>
   <description>The tensorflow_object_detector package</description>
@@ -40,21 +40,21 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>cv_bridge</build_depend>
-  <build_depend>rospy</build_depend>
+  <!--<build_depend>cv_bridge</build_depend>-->
+  <build_depend>rclpy</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>vision_msgs</build_depend>
+  <!--<build_depend>vision_msgs</build_depend>-->
 
-  <run_depend>cv_bridge</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>vision_msgs</run_depend>
+  <!--<run_depend>cv_bridge</run_depend>-->
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <!--<run_depend>vision_msgs</run_depend>-->
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
-
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

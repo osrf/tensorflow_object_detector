@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 ## Author: Rohit
 ## Date: July, 25, 2017
 #Purpose: Ros node to detect objects using tensorflow
@@ -147,12 +147,12 @@ with detection_graph.as_default():
 
       def __init__(self):
         self.image_pub = rospy.Publisher("debug_image",Image, queue_size=1)
-        self.object_pub = rospy.Publisher("objects", Detection2DArray, queue_size=1)
+        #self.object_pub = rospy.Publisher("objects", Detection2DArray, queue_size=1)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("image", Image, self.image_cb, queue_size=1, buff_size=2**24)
 
       def image_cb(self, data):
-        objArray = Detection2DArray()
+        #objArray = Detection2DArray()
         try:
           cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
@@ -162,21 +162,21 @@ with detection_graph.as_default():
         # the array based representation of the image will be used later in order to prepare the
         # result image with boxes and labels on it.
         image_np = np.asarray(image)
-        # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+        # Expand dimensions since the model expects images to have shape: [1,
+        # None, None, 3]
         image_np_expanded = np.expand_dims(image_np, axis=0)
-
         image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
-    	score_out = detection_graph.get_tensor_by_name('Postprocessor/convert_scores:0')
-    	expand_out = detection_graph.get_tensor_by_name('Postprocessor/ExpandDims_1:0')
-    	score_in = detection_graph.get_tensor_by_name('Postprocessor/convert_scores_1:0')
-    	expand_in = detection_graph.get_tensor_by_name('Postprocessor/ExpandDims_1_1:0')
-    	detection_boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
-    	detection_scores = detection_graph.get_tensor_by_name('detection_scores:0')
-    	detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
-    	num_detections = detection_graph.get_tensor_by_name('num_detections:0')
+        score_out = detection_graph.get_tensor_by_name('Postprocessor/convert_scores:0')
+        expand_out = detection_graph.get_tensor_by_name('Postprocessor/ExpandDims_1:0')
+        score_in = detection_graph.get_tensor_by_name('Postprocessor/convert_scores_1:0')
+        expand_in = detection_graph.get_tensor_by_name('Postprocessor/ExpandDims_1_1:0')
+        detection_boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
+        detection_scores = detection_graph.get_tensor_by_name('detection_scores:0')
+        detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
+        num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
-	(score, expand) = sess.run([score_out, expand_out], feed_dict={image_tensor: image_np_expanded})
-	(boxes, scores, classes, num) = sess.run([detection_boxes, detection_scores, detection_classes, 	   		num_detections], feed_dict={score_in:score, expand_in: expand})
+        (score, expand) = sess.run([score_out, expand_out], feed_dict={image_tensor: image_np_expanded})
+        (boxes, scores, classes, num) = sess.run([detection_boxes, detection_scores, detection_classes, 	   		num_detections], feed_dict={score_in:score, expand_in: expand})
 
         objects=vis_util.visualize_boxes_and_labels_on_image_array(
             image,
