@@ -1,0 +1,3 @@
+export ROS_SECURITY_ROOT_DIRECTORY=~/ros2/keys
+export ROS_SECURITY_ENABLE=true
+export ROS_SECURITY_STRATEGY=Enforce
