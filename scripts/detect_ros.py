@@ -31,6 +31,8 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithPose
 import copy
+import rospkg
+rospack = rospkg.RosPack()
 
 #for time
 import time
@@ -48,14 +50,14 @@ from object_detection.utils import visualization_utils as vis_util
 ######### CHANGE THE MODEL NAME HERE ############
 MODEL_NAME =  'ssd_mobilenet_v1_coco_2017_11_17'
 # By default models are stored in data/models/
-MODEL_PATH = os.path.join(os.path.dirname(sys.path[0]),'data','models' , MODEL_NAME)
+MODEL_PATH = os.path.join(rospack.get_path('tensorflow_object_detector'),'data','models' , MODEL_NAME)
 
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 PATH_TO_CKPT = MODEL_PATH + '/frozen_inference_graph.pb'
 ######### CHANGE THE LABEL NAME HERE ###########
 LABEL_NAME = 'mscoco_label_map.pbtxt'
 # List of the strings that is used to add correct label for each box.
-PATH_TO_LABELS = os.path.join(os.path.dirname(sys.path[0]),'data','labels', LABEL_NAME)
+PATH_TO_LABELS = os.path.join(rospack.get_path('tensorflow_object_detector'),'data','labels', LABEL_NAME)
 
 ###CHANGE NUMBER OF CLASSES HERE ####
 NUM_CLASSES = 90
@@ -141,8 +143,13 @@ def load_image_into_numpy_array(image):
       (im_height, im_width, 3)).astype(np.uint8)
 
 # # Detection
+tf_config = tf.ConfigProto()
+tf_config.allow_soft_placement = True
+tf_config.gpu_options.allow_growth = True
+
+
 with detection_graph.as_default():
-  with tf.Session(graph=detection_graph,config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+  with tf.Session(graph=detection_graph,config=tf_config) as sess:
     class detector:
 
       def __init__(self):
