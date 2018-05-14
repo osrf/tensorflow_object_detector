@@ -5,14 +5,13 @@
 	<node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"  output="screen"> 
       <rosparam file="$(arg config_file_path)" command="load" />
       <param name="model_root" value="$(arg model_root)" />
-      <!--remap from='image' to='/camera/rgb/image_raw'/-->
-      <remap from='image' to='/camera/color/image_raw'/>
+      <remap from='image' to='/camera/rgb/image_raw'/>
 	</node>
 
-	<!-- rviz
+	<!-- rviz -->
   <arg name ="rviz" default="true" />
   <arg name ="rviz_file" default="$(find tensorflow_object_detector)/config/display.rviz"/>
   <node pkg ="rviz" type="rviz" name="rviz" output="screen" args= "-d $(arg rviz_file)" if="$(arg rviz)"/>
-  <include file="$(find openni2_launch)/launch/openni2.launch"/-->
+  <include file="$(find openni2_launch)/launch/openni2.launch"/>
 
 </launch>
