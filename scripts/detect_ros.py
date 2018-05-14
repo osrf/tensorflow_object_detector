@@ -39,11 +39,11 @@ gpu_fraction = rospy.get_param('~gpu_fraction')
 rospack = rospkg.RosPack()
 pkg_path = rospack.get_path('tensorflow_object_detector');
 model_root = rospy.get_param('~model_root')
-model_path = os.path.join(model_root, model_name)
+model_path = os.path.join(model_root, 'models', model_name)
 frozen_graph_file_name = rospy.get_param('~frozen_graph_file_name')
 path_to_ckpt = os.path.join(model_path, frozen_graph_file_name)
 label_map_file = rospy.get_param('~label_map_file_name')
-path_to_label_maps = os.path.join(pkg_path, 'data/labels', label_map_file)
+path_to_label_maps = os.path.join(model_root, 'labels', label_map_file)
 num_classes = rospy.get_param('~num_classes')
 
 detection_graph = tf.Graph()

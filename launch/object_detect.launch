@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="config_file_path" default="$(find tensorflow_object_detector)/config/config.yaml"/>
-    <arg name="model_root" default="$(find tensorflow_object_detector)/data/models"/>
+    <arg name="model_root" default="$(find tensorflow_object_detector)/data"/>
 	<node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"  output="screen"> 
       <rosparam file="$(arg config_file_path)" command="load" />
       <param name="model_root" value="$(arg model_root)" />
