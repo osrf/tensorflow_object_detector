@@ -3,6 +3,9 @@
 ## Date: July, 25, 2017
 # Purpose: Ros node to detect objects using tensorflow
 
+# Modified by Thanuja Ambegoda, Enway GmbH - May 13th, 2018
+# Added config.yaml to paraeterize model name, model path, label file path...
+
 import os
 import sys
 import cv2
@@ -17,6 +20,7 @@ except ImportError:
 
 # ROS related imports
 import rospy
+import rospkg
 from std_msgs.msg import String , Header
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -27,26 +31,25 @@ import object_detection
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
-# SET FRACTION OF GPU YOU WANT TO USE HERE
-GPU_FRACTION = 0.4
-
-######### Set model here ############
-MODEL_NAME =  'ssd_mobilenet_v1_coco_11_06_2017'
-# By default models are stored in data/models/
-MODEL_PATH = os.path.join(os.path.dirname(sys.path[0]),'data','models' , MODEL_NAME)
-# Path to frozen detection graph. This is the actual model that is used for the object detection.
-PATH_TO_CKPT = MODEL_PATH + '/frozen_inference_graph.pb'
-######### Set the label map file here ###########
-LABEL_NAME = 'mscoco_label_map.pbtxt'
-# By default label maps are stored in data/labels/
-PATH_TO_LABELS = os.path.join(os.path.dirname(sys.path[0]),'data','labels', LABEL_NAME)
-######### Set the number of classes here #########
-NUM_CLASSES = 90
+rospy.init_node('tensorflow_object_detector_node')
+debug_image_topic = rospy.get_param('~debug_image_pub_name')
+object_pub_topic = rospy.get_param('~object_pub_name')
+model_name = rospy.get_param('~model_name')
+gpu_fraction = rospy.get_param('~gpu_fraction')
+rospack = rospkg.RosPack()
+pkg_path = rospack.get_path('tensorflow_object_detector');
+model_root = rospy.get_param('~model_root')
+model_path = os.path.join(model_root, model_name)
+frozen_graph_file_name = rospy.get_param('~frozen_graph_file_name')
+path_to_ckpt = os.path.join(model_path, frozen_graph_file_name)
+label_map_file = rospy.get_param('~label_map_file_name')
+path_to_label_maps = os.path.join(pkg_path, 'data/labels', label_map_file)
+num_classes = rospy.get_param('~num_classes')
 
 detection_graph = tf.Graph()
 with detection_graph.as_default():
   od_graph_def = tf.GraphDef()
-  with tf.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
+  with tf.gfile.GFile(path_to_ckpt, 'rb') as fid:
     serialized_graph = fid.read()
     od_graph_def.ParseFromString(serialized_graph)
     tf.import_graph_def(od_graph_def, name='')
@@ -55,13 +58,13 @@ with detection_graph.as_default():
 # Label maps map indices to category names, so that when our convolution network predicts `5`,
 # we know that this corresponds to `airplane`.  Here we use internal utility functions,
 # but anything that returns a dictionary mapping integers to appropriate string labels would be fine
-label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
-categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
+label_map = label_map_util.load_labelmap(path_to_label_maps)
+categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=num_classes, use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
 # Setting the GPU options to use fraction of gpu that has been set
 config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = GPU_FRACTION
+config.gpu_options.per_process_gpu_memory_fraction = gpu_fraction
 
 # Detection
 with detection_graph.as_default():
@@ -69,8 +72,8 @@ with detection_graph.as_default():
     class detector:
 
       def __init__(self):
-        self.image_pub = rospy.Publisher("debug_image",Image, queue_size=1)
-        self.object_pub = rospy.Publisher("objects", Detection2DArray, queue_size=1)
+        self.image_pub = rospy.Publisher(debug_image_topic, Image, queue_size=1)
+        self.object_pub = rospy.Publisher(object_pub_topic, Detection2DArray, queue_size=1)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("image", Image, self.image_cb, queue_size=1, buff_size=2**24)
 
@@ -146,7 +149,6 @@ with detection_graph.as_default():
         return obj
 
 def main(args):
-  rospy.init_node('detector_node')
   obj=detector()
   try:
     rospy.spin()
