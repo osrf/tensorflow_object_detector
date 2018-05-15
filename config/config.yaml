@@ -1,0 +1,8 @@
+debug_image_pub_name: /object_detector/debug_image
+object_pub_name: /object_detector/objects
+model_name: ssd_mobilenet_v1_coco_11_06_2017
+
+gpu_fraction: 0.4
+frozen_graph_file_name: frozen_inference_graph.pb
+label_map_file_name: mscoco_label_map.pbtxt
+num_classes: 90
