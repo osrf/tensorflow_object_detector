@@ -45,11 +45,11 @@ NUM_CLASSES = 90
 
 detection_graph = tf.Graph()
 with detection_graph.as_default():
-  od_graph_def = tf.GraphDef()
-  with tf.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
-    serialized_graph = fid.read()
-    od_graph_def.ParseFromString(serialized_graph)
-    tf.import_graph_def(od_graph_def, name='')
+    od_graph_def = tf.GraphDef()
+    with tf.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
+        serialized_graph = fid.read()
+        od_graph_def.ParseFromString(serialized_graph)
+        tf.import_graph_def(od_graph_def, name='')
 
 ## Loading label map
 # Label maps map indices to category names, so that when our convolution network predicts `5`,
@@ -64,22 +64,22 @@ config = tf.ConfigProto()
 config.gpu_options.per_process_gpu_memory_fraction = GPU_FRACTION
 
 # Detection
-with detection_graph.as_default():
-  with tf.Session(graph=detection_graph,config=config) as sess:
-    class detector:
 
-      def __init__(self):
+class Detector:
+
+    def __init__(self):
         self.image_pub = rospy.Publisher("debug_image",Image, queue_size=1)
         self.object_pub = rospy.Publisher("objects", Detection2DArray, queue_size=1)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("image", Image, self.image_cb, queue_size=1, buff_size=2**24)
+        self.sess = tf.Session(graph=detection_graph,config=config)
 
-      def image_cb(self, data):
+    def image_cb(self, data):
         objArray = Detection2DArray()
         try:
-          cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
-          print(e)
+            print(e)
         image=cv2.cvtColor(cv_image,cv2.COLOR_BGR2RGB)
 
         # the array based representation of the image will be used later in order to prepare the
@@ -95,8 +95,10 @@ with detection_graph.as_default():
         scores = detection_graph.get_tensor_by_name('detection_scores:0')
         classes = detection_graph.get_tensor_by_name('detection_classes:0')
         num_detections = detection_graph.get_tensor_by_name('num_detections:0')
-        (boxes, scores, classes, num_detections) = sess.run([boxes, scores, classes, num_detections],
+
+        (boxes, scores, classes, num_detections) = self.sess.run([boxes, scores, classes, num_detections],
             feed_dict={image_tensor: image_np_expanded})
+
         objects=vis_util.visualize_boxes_and_labels_on_image_array(
             image,
             np.squeeze(boxes),
@@ -111,21 +113,21 @@ with detection_graph.as_default():
         object_count=1
 
         for i in range(len(objects)):
-          object_count+=1
-          objArray.detections.append(self.object_predict(objects[i],data.header,image_np,cv_image))
+            object_count+=1
+            objArray.detections.append(self.object_predict(objects[i],data.header,image_np,cv_image))
 
         self.object_pub.publish(objArray)
 
         img=cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
         image_out = Image()
         try:
-          image_out = self.bridge.cv2_to_imgmsg(img,"bgr8")
+            image_out = self.bridge.cv2_to_imgmsg(img,"bgr8")
         except CvBridgeError as e:
-          print(e)
+            print(e)
         image_out.header = data.header
         self.image_pub.publish(image_out)
 
-      def object_predict(self,object_data, header, image_np,image):
+    def object_predict(self,object_data, header, image_np,image):
         image_height,image_width,channels = image.shape
         obj=Detection2D()
         obj_hypothesis= ObjectHypothesisWithPose()
@@ -146,13 +148,13 @@ with detection_graph.as_default():
         return obj
 
 def main(args):
-  rospy.init_node('detector_node')
-  obj=detector()
-  try:
-    rospy.spin()
-  except KeyboardInterrupt:
-    print("ShutDown")
-  cv2.destroyAllWindows()
+    rospy.init_node('detector_node')
+    obj=Detector()
+    try:
+        rospy.spin()
+    except KeyboardInterrupt:
+        print("ShutDown")
+    cv2.destroyAllWindows()
 
 if __name__=='__main__':
-  main(sys.argv)
+    main(sys.argv)
