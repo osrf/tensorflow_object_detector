@@ -12,9 +12,17 @@ To run Default SSD (Single Shot Detection) algorithm:
 
 1. Install ROS: http://wiki.ros.org/kinetic/Installation/Ubuntu
 
-2. Install camera dependencies
+2. Install any one of the following camera dependencies
 
-    `sudo apt-get install ros-kinetic-usb_cam ros-kinetic-openni2-launch`
+    `sudo apt install ros-kinetic-openni2-launch` (for openni2 supported camera)
+
+                OR
+
+    `sudo apt install ros-kinetic-usb-cam`  (usb camera / webcam)
+
+                OR
+
+    `sudo apt install ros-kinetic-cv-camera`  (usb camera / webcam)
 
 3. Install tensorflow into python virtualenv: https://www.tensorflow.org/install/install_linux
 
@@ -38,7 +46,7 @@ To run Default SSD (Single Shot Detection) algorithm:
 
     `git clone https://github.com/osrf/tensorflow_object_detector.git`
 
-6. Build tensorflow_object_detector and Vision message 
+6. Build tensorflow_object_detector and Vision message
 
     `cd ~/catkin_ws && catkin_make`
 
@@ -54,11 +62,12 @@ To run Default SSD (Single Shot Detection) algorithm:
 
     `roslaunch tensorflow_object_detector usb_cam_detector.launch`
 
+    OR
 
+    `roslaunch tensorflow_object_detector cv_camera_detector.launch`
 
 If you want to try any other ML model:
 
 1. Download any Object Detection Models from the Tensorflow Object detection API and place it in `data/models/`. You can find the models in tensorflow Object Detection Model Zoo: https://github.com/tensorflow/models/blob/master/object_detection/g3doc/detection_model_zoo.md. Extract the `tar.gz` file.
 
-2. Edit the MODEL_NAME and LABEL_NAME in detect_ros.py. By default it is `ssd_mobilenet_v1_coco_11_06_2017` with `mscoco_label_map.pbtxt` respectively. 
-
+2. Edit the MODEL_NAME and LABEL_NAME in detect_ros.py. By default it is `ssd_mobilenet_v1_coco_11_06_2017` with `mscoco_label_map.pbtxt` respectively.
