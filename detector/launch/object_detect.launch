@@ -1,6 +1,10 @@
 <launch>
-	<node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"  output="screen"> 
+	<node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"  output="screen">
     <remap from='image' to='/camera/rgb/image_raw'/>
+
+		<param name="model_path" value=""/>
+		<param name="labels_path" value=""/>
+		<param name="num_classes" value="90"/>
 	</node>
 	<!-- rviz -->
   <arg name ="rviz" default="true" />

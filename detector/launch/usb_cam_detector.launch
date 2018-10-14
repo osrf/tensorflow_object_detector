@@ -1,6 +1,10 @@
 <launch>
 	<node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"  output="screen">
     <remap from="image" to="/usb_cam_node/image_raw"/>
+
+		<param name="model_path" value=""/>
+		<param name="labels_path" value=""/>
+		<param name="num_classes" value="90"/>
 	</node>
 
   <node pkg="usb_cam" type="usb_cam_node" name="usb_cam_node" output="screen">

@@ -6,6 +6,7 @@
 import os
 import sys
 import cv2
+import tarfile
 import numpy as np
 try:
     import tensorflow as tf
@@ -26,53 +27,125 @@ from vision_msgs.msg import Detection2D, Detection2DArray, ObjectHypothesisWithP
 import object_detection
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
+import urllib2
 
-# SET FRACTION OF GPU YOU WANT TO USE HERE
-GPU_FRACTION = 0.4
+DEFAULT_MODEL = os.path.join(os.path.expanduser("~"), "data", "models", "ssd_mobilenet_v1_coco_2018_01_28", "frozen_inference_graph.pb")
+DEFAULT_LABELS = os.path.join(os.path.dirname(sys.path[0]), "data", "labels", "mscoco_label_map.pbtxt")
 
-######### Set model here ############
-MODEL_NAME =  'ssd_mobilenet_v1_coco_11_06_2017'
-# By default models are stored in data/models/
-MODEL_PATH = os.path.join(os.path.dirname(sys.path[0]),'data','models' , MODEL_NAME)
-# Path to frozen detection graph. This is the actual model that is used for the object detection.
-PATH_TO_CKPT = MODEL_PATH + '/frozen_inference_graph.pb'
-######### Set the label map file here ###########
-LABEL_NAME = 'mscoco_label_map.pbtxt'
-# By default label maps are stored in data/labels/
-PATH_TO_LABELS = os.path.join(os.path.dirname(sys.path[0]),'data','labels', LABEL_NAME)
-######### Set the number of classes here #########
-NUM_CLASSES = 90
+def download_model(url, location):
 
-detection_graph = tf.Graph()
-with detection_graph.as_default():
-    od_graph_def = tf.GraphDef()
-    with tf.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
-        serialized_graph = fid.read()
-        od_graph_def.ParseFromString(serialized_graph)
-        tf.import_graph_def(od_graph_def, name='')
+    file_name = url.split('/')[-1]
+    u = urllib2.urlopen(url)
+    if not os.path.exists(location):
+        os.makedirs(location)
 
-## Loading label map
-# Label maps map indices to category names, so that when our convolution network predicts `5`,
-# we know that this corresponds to `airplane`.  Here we use internal utility functions,
-# but anything that returns a dictionary mapping integers to appropriate string labels would be fine
-label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
-categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
-category_index = label_map_util.create_category_index(categories)
+    file_path = os.path.join(location, os.path.basename(url))
+    f = open(file_path, 'wb')
+    meta = u.info()
+    file_size = int(meta.getheaders("Content-Length")[0])
+    print "Downloading: %s Bytes: %s" % (file_name, file_size)
 
-# Setting the GPU options to use fraction of gpu that has been set
-config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = GPU_FRACTION
+    file_size_dl = 0
+    block_sz = 8192
+    while True:
+        buffer = u.read(block_sz)
+        if not buffer:
+            break
+
+        file_size_dl += len(buffer)
+        f.write(buffer)
+        status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+        status = status + chr(8)*(len(status)+1)
+        print status,
+
+    f.close()
+
+    return file_path
+
+def download_data():
+    ## Downloading COCO Trained Model
+    if not os.path.exists(DEFAULT_MODEL):
+        model_path = os.path.join(os.path.expanduser("~"), "data", "models")
+        final_path = download_model("http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz", model_path)
+        print final_path
+        tar = tarfile.open(final_path)
+        tar.extractall(path=os.path.dirname(final_path))
+        tar.close()
+
+def get_model_params():
+    model_path = rospy.get_param("~model_path")
+    labels_path = rospy.get_param("~labels_path")
+
+
+    if (not model_path and not labels_path):
+        rospy.logwarn("No params passed, using default model")
+        download_data()
+        return (DEFAULT_MODEL, DEFAULT_LABELS)
+
+    elif (os.path.exists(os.path.join(model_path, "frozen_inference_graph.pb")) and os.path.exists(labels_path)):
+        rospy.loginfo("Using Passed parameters")
+        return (os.path.join(model_path, "frozen_inference_graph.pb"), labels_path)
+
+    else:
+        raise Exception("Either Incomplete arguments were passed or the paths do not exist. To use the default model do not pass any parameters. NOTE: Please use absolute paths in params")
 
 # Detection
 
 class Detector:
 
     def __init__(self):
+
+        ######### Set model here ############
+        path_to_ckpt, path_to_labels = get_model_params()
+
+        num_classes = rospy.get_param("~num_classes")
+
+        detection_graph = tf.Graph()
+        with detection_graph.as_default():
+            od_graph_def = tf.GraphDef()
+            with tf.gfile.GFile(path_to_ckpt, 'rb') as fid:
+                serialized_graph = fid.read()
+                od_graph_def.ParseFromString(serialized_graph)
+                tf.import_graph_def(od_graph_def, name='')
+
+        ## Loading label map
+        # Label maps map indices to category names, so that when our convolution network predicts `5`,
+        # we know that this corresponds to `airplane`.  Here we use internal utility functions,
+        # but anything that returns a dictionary mapping integers to appropriate string labels would be fine
+        label_map = label_map_util.load_labelmap(path_to_labels)
+        categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=num_classes, use_display_name=True)
+        self.category_index = label_map_util.create_category_index(categories)
+
+        # Setting the GPU options to use fraction of gpu that has been set
+        # config = tf.ConfigProto()
+        # config.gpu_options.per_process_gpu_memory_fraction = GPU_FRACTION
+        ops = detection_graph.get_operations()
+        all_tensor_names = {output.name for op in ops for output in op.outputs}
+        self.tensor_dict = {}
+        for key in [
+            'num_detections', 'detection_boxes', 'detection_scores',
+            'detection_classes', 'detection_masks'
+        ]:
+            tensor_name = key + ':0'
+            if tensor_name in all_tensor_names:
+                self.tensor_dict[key] = detection_graph.get_tensor_by_name(
+                    tensor_name)
+
+        self.image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
+
+        self.sess = tf.Session(graph=detection_graph)
+
+        rospy.loginfo("Initializing")
+
+        dummy_tensor = np.zeros((1,1,1,3), dtype=np.int32)
+        self.sess.run(self.tensor_dict,
+                               feed_dict={self.image_tensor: dummy_tensor})
+
         self.image_pub = rospy.Publisher("debug_image",Image, queue_size=1)
         self.object_pub = rospy.Publisher("objects", Detection2DArray, queue_size=1)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("image", Image, self.image_cb, queue_size=1, buff_size=2**24)
-        self.sess = tf.Session(graph=detection_graph,config=config)
+
 
     def image_cb(self, data):
         objArray = Detection2DArray()
@@ -87,24 +160,16 @@ class Detector:
         image_np = np.asarray(image)
         # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
         image_np_expanded = np.expand_dims(image_np, axis=0)
-        image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
-        # Each box represents a part of the image where a particular object was detected.
-        boxes = detection_graph.get_tensor_by_name('detection_boxes:0')
-        # Each score represent how level of confidence for each of the objects.
-        # Score is shown on the result image, together with the class label.
-        scores = detection_graph.get_tensor_by_name('detection_scores:0')
-        classes = detection_graph.get_tensor_by_name('detection_classes:0')
-        num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 
-        (boxes, scores, classes, num_detections) = self.sess.run([boxes, scores, classes, num_detections],
-            feed_dict={image_tensor: image_np_expanded})
+        output_dict = self.sess.run(self.tensor_dict,
+                                    feed_dict={self.image_tensor: image_np_expanded})
 
         objects=vis_util.visualize_boxes_and_labels_on_image_array(
             image,
-            np.squeeze(boxes),
-            np.squeeze(classes).astype(np.int32),
-            np.squeeze(scores),
-            category_index,
+            np.squeeze(output_dict["detection_boxes"]),
+            np.squeeze(output_dict["detection_classes"]).astype(np.int32),
+            np.squeeze(output_dict["detection_scores"]),
+            self.category_index,
             use_normalized_coordinates=True,
             line_thickness=2)
 
