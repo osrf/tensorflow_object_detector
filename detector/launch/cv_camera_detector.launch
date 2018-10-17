@@ -1,0 +1,17 @@
+<launch>
+	<node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"  output="screen">
+    <remap from="image" to="/cv_camera_node/image_raw"/>
+
+		<param name="model_path" value=""/>
+		<param name="labels_path" value=""/>
+		<param name="num_classes" value="90"/>
+	</node>
+
+  <node pkg="cv_camera" type="cv_camera_node" name="cv_camera_node" output="screen">
+    <param name="device_id" value="0"/>
+  </node>
+
+  <node pkg="image_view" type="image_view" name="image_view">
+    <remap from="image" to="debug_image"/>
+  </node>
+</launch>
